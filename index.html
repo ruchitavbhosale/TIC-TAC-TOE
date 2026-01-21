@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>⚡  Tic Tac Toe </title>
+
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+
+<style>
+/* ===== BASE ===== */
+*{margin:0;padding:0;box-sizing:border-box}
+
+body{
+  min-height:100vh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  background:
+    radial-gradient(circle at top, #0a0a25, #02020a),
+    repeating-linear-gradient(45deg, rgba(0,255,255,0.03) 0 2px, transparent 2px 6px);
+  color:white;
+  font-family:'Poppins',sans-serif;
+}
+
+/* ===== SCREEN ===== */
+.screen{
+  background:linear-gradient(145deg, rgba(0,255,255,0.08), rgba(255,0,255,0.05));
+  padding:40px;
+  border-radius:28px;
+  backdrop-filter:blur(18px);
+  text-align:center;
+  box-shadow:0 0 40px rgba(0,255,255,0.35), inset 0 0 30px rgba(255,255,255,0.05);
+  animation:zoomIn .6s ease;
+  min-width:420px;
+}
+
+@keyframes zoomIn{
+  from{opacity:0;transform:scale(.85) translateY(20px)}
+  to{opacity:1;transform:scale(1) translateY(0)}
+}
+
+h1{
+  margin-bottom:22px;
+  font-family:'Orbitron',sans-serif;
+  letter-spacing:2px;
+  color:cyan;
+  text-shadow:0 0 25px cyan;
+}
+
+/* ===== BUTTON ===== */
+button{
+  width:280px;
+  margin:14px auto;
+  padding:16px;
+  border:none;
+  border-radius:40px;
+  font-size:18px;
+  cursor:pointer;
+  background:linear-gradient(135deg, cyan, magenta);
+  color:black;
+  font-weight:bold;
+  letter-spacing:1px;
+  transition:.25s;
+  box-shadow:0 0 15px rgba(0,255,255,.6);
+}
+
+button:hover{
+  transform:scale(1.08);
+  box-shadow:0 0 25px cyan, 0 0 45px magenta;
+}
+
+/* ===== STATUS ===== */
+#status{
+  margin:18px 0;
+  font-size:20px;
+  color:#00ffd5;
+  text-shadow:0 0 10px cyan;
+  animation:pulse 1.5s infinite;
+}
+
+@keyframes pulse{
+  0%,100%{opacity:1}
+  50%{opacity:.6}
+}
+
+/* ===== BOARD ===== */
+.board{
+  display:grid;
+  grid-template-columns:repeat(3,115px);
+  gap:18px;
+  margin:28px auto;
+  padding:20px;
+  border-radius:22px;
+  background:rgba(0,0,0,.4);
+  box-shadow:inset 0 0 30px rgba(0,255,255,.25), 0 0 35px rgba(0,255,255,.35);
+}
+
+/* ===== CELL ===== */
+.cell{
+  width:115px;
+  height:115px;
+  background:linear-gradient(145deg, rgba(255,255,255,.12), rgba(255,255,255,.03));
+  border-radius:22px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:56px;
+  cursor:pointer;
+  transition:.2s;
+  box-shadow:inset 0 0 18px rgba(255,255,255,.08), 0 0 20px rgba(0,255,255,.25);
+}
+
+.cell:hover{
+  transform:scale(1.08);
+  box-shadow:0 0 30px cyan, inset 0 0 25px rgba(255,255,255,.15);
+}
+
+.cell.X{color:#00e5ff;text-shadow:0 0 25px #00e5ff}
+.cell.O{color:#ff00ff;text-shadow:0 0 25px #ff00ff}
+
+/* ===== WIN ===== */
+.cell.win{
+  animation:winFlash .8s infinite alternate;
+  background:rgba(0,255,0,.35);
+}
+
+@keyframes winFlash{
+  from{box-shadow:0 0 20px lime}
+  to{box-shadow:0 0 45px lime}
+}
+
+/* ===== FOOTER ===== */
+.game-buttons{
+  display:flex;
+  justify-content:center;
+  gap:18px;
+  margin-top:15px;
+}
+
+.game-buttons button{
+  width:auto;
+  padding:12px 28px;
+  font-size:16px;
+}
+</style>
+</head>
+
+<body>
+
+<!-- MENU -->
+<div class="screen" id="menuScreen">
+  <h1>⚡TIC TAC TOE</h1>
+  <button onclick="openDifficulty()">🤖 Play vs Computer</button>
+  <button onclick="startGame('player')">👥 2 Players</button>
+</div>
+
+<!-- DIFFICULTY -->
+<div class="screen" id="difficultyScreen" style="display:none;">
+  <h1>Select Difficulty</h1>
+  <button onclick="startCpuGame('easy')">🟢 Easy</button>
+  <button onclick="startCpuGame('medium')">🟡 Medium</button>
+  <button onclick="startCpuGame('hard')">🔴 Hard </button>
+  <br>
+  <button onclick="backToMenu()">Back</button>
+</div>
+
+<!-- GAME -->
+<div class="screen" id="gameScreen" style="display:none;">
+  <h1>⚡ TIC TAC TOE</h1>
+  <div id="status">Player X Turn</div>
+  <div class="board" id="board"></div>
+  <div class="game-buttons">
+    <button onclick="restartGame()">🔁 Restart</button>
+    <button onclick="goToMenu()">🏠 Menu</button>
+  </div>
+</div>
+
+<script>
+const menuScreen = document.getElementById("menuScreen");
+const difficultyScreen = document.getElementById("difficultyScreen");
+const gameScreen = document.getElementById("gameScreen");
+const boardDiv = document.getElementById("board");
+const statusText = document.getElementById("status");
+
+let cells = [];
+let board = ["","","","","","","","",""];
+let currentPlayer = "X";
+let isGameActive = true;
+let gameMode = "player";
+let difficulty = "easy";
+
+const winConditions = [
+  [0,1,2],[3,4,5],[6,7,8],
+  [0,3,6],[1,4,7],[2,5,8],
+  [0,4,8],[2,4,6]
+];
+
+/* SCREENS */
+function openDifficulty(){menuScreen.style.display="none";difficultyScreen.style.display="block";}
+function backToMenu(){difficultyScreen.style.display="none";menuScreen.style.display="block";}
+function startCpuGame(level){difficulty=level;startGame("cpu");}
+
+function startGame(mode){
+  gameMode=mode;
+  menuScreen.style.display="none";
+  difficultyScreen.style.display="none";
+  gameScreen.style.display="block";
+  createBoard();
+  restartGame();
+}
+
+/* GAME */
+function createBoard(){
+  boardDiv.innerHTML="";
+  cells=[];
+  for(let i=0;i<9;i++){
+    const cell=document.createElement("div");
+    cell.classList.add("cell");
+    cell.dataset.index=i;
+    cell.addEventListener("click", handleClick);
+    boardDiv.appendChild(cell);
+    cells.push(cell);
+  }
+}
+
+function handleClick(){
+  const i=this.dataset.index;
+  if(board[i]!=="" || !isGameActive) return;
+
+  makeMove(i,currentPlayer);
+
+  if(gameMode==="cpu" && isGameActive && currentPlayer==="O"){
+    setTimeout(cpuMove,400);
+  }
+}
+
+function makeMove(i,p){
+  board[i]=p;
+  cells[i].textContent=p;
+  cells[i].classList.add(p);
+  checkWinner();
+}
+
+/* CPU */
+function cpuMove(){
+  let move;
+  if(difficulty==="easy") move=randomMove();
+  else if(difficulty==="medium"){
+    move=findBestMove("O");
+    if(move===-1) move=findBestMove("X");
+    if(move===-1 && board[4]==="") move=4;
+    if(move===-1) move=randomMove();
+  } else {
+    move=minimax(board,"O").index;
+  }
+  makeMove(move,"O");
+}
+
+function randomMove(){
+  let empty=board.map((v,i)=>v===""?i:null).filter(v=>v!==null);
+  return empty[Math.floor(Math.random()*empty.length)];
+}
+
+function findBestMove(player){
+  for(let c of winConditions){
+    const [a,b,c2]=c;
+    const line=[board[a],board[b],board[c2]];
+    if(line.filter(v=>v===player).length===2 && line.includes("")){
+      if(board[a]==="") return a;
+      if(board[b]==="") return b;
+      if(board[c2]==="") return c2;
+    }
+  }
+  return -1;
+}
+
+/* MINIMAX */
+function minimax(b,p){
+  if(checkWinFor(b,"X")) return {score:-10};
+  if(checkWinFor(b,"O")) return {score:10};
+  if(!b.includes("")) return {score:0};
+
+  let moves=[];
+  for(let i=0;i<9;i++){
+    if(b[i]===""){
+      let move={index:i};
+      b[i]=p;
+      move.score=minimax(b, p==="O"?"X":"O").score;
+      b[i]="";
+      moves.push(move);
+    }
+  }
+
+  let best;
+  if(p==="O"){
+    let max=-9999;
+    for(let m of moves){ if(m.score>max){max=m.score; best=m;} }
+  } else {
+    let min=9999;
+    for(let m of moves){ if(m.score<min){min=m.score; best=m;} }
+  }
+  return best;
+}
+
+function checkWinFor(b,p){
+  return winConditions.some(c=>c.every(i=>b[i]===p));
+}
+
+/* WIN CHECK */
+function checkWinner(){
+  for(let c of winConditions){
+    const [a,b,c2]=c;
+    if(board[a] && board[a]===board[b] && board[a]===board[c2]){
+      statusText.textContent=`🎉 Player ${currentPlayer} Wins!`;
+      c.forEach(i=>cells[i].classList.add("win"));
+      isGameActive=false;
+      return;
+    }
+  }
+  if(!board.includes("")){
+    statusText.textContent="😲 It's a Draw!";
+    isGameActive=false;
+    return;
+  }
+  currentPlayer=currentPlayer==="X"?"O":"X";
+  statusText.textContent=`Player ${currentPlayer} Turn`;
+}
+
+/* RESET */
+function restartGame(){
+  board=["","","","","","","","",""];
+  currentPlayer="X";
+  isGameActive=true;
+  statusText.textContent="Player X Turn";
+  cells.forEach(c=>{c.textContent="";c.className="cell";});
+}
+
+function goToMenu(){
+  gameScreen.style.display="none";
+  menuScreen.style.display="block";
+}
+</script>
+
+</body>
+</html>
