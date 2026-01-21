@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>⚡  Tic Tac Toe </title>
+
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<!-- MENU -->
+<div class="screen" id="menuScreen">
+  <h1>⚡TIC TAC TOE</h1>
+  <button onclick="openDifficulty()">🤖 Play vs Computer</button>
+  <button onclick="startGame('player')">👥 2 Players</button>
+</div>
+
+<!-- DIFFICULTY -->
+<div class="screen" id="difficultyScreen" style="display:none;">
+  <h1>Select Difficulty</h1>
+  <button onclick="startCpuGame('easy')">🟢 Easy</button>
+  <button onclick="startCpuGame('medium')">🟡 Medium</button>
+  <button onclick="startCpuGame('hard')">🔴 Hard </button>
+  <br>
+  <button onclick="backToMenu()">Back</button>
+</div>
+
+<!-- GAME -->
+<div class="screen" id="gameScreen" style="display:none;">
+  <h1>⚡ TIC TAC TOE</h1>
+  <div id="status">Player X Turn</div>
+  <div class="board" id="board"></div>
+  <div class="game-buttons">
+    <button onclick="restartGame()">🔁 Restart</button>
+    <button onclick="goToMenu()">🏠 Menu</button>
+  </div>
+</div>
+
+<script src="script.js"></script>
+
+</body>
+</html>
