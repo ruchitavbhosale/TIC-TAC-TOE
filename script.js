@@ -150,6 +150,7 @@ function checkWinner(){
 }
 
 /* RESET */
+
 function restartGame(){
   board=["","","","","","","","",""];
   currentPlayer="X";
