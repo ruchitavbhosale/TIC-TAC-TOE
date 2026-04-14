@@ -34,6 +34,7 @@ function startGame(mode){
 }
 
 /* GAME */
+
 function createBoard(){
   boardDiv.innerHTML="";
   cells=[];
