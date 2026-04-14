@@ -19,6 +19,7 @@ const winConditions = [
 ];
 
 /* SCREENS */
+
 function openDifficulty(){menuScreen.style.display="none";difficultyScreen.style.display="block";}
 function backToMenu(){difficultyScreen.style.display="none";menuScreen.style.display="block";}
 function startCpuGame(level){difficulty=level;startGame("cpu");}
